@@ -8,6 +8,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib import pagesizes
 from reportlab.lib.units import inch
+from num2words import num2words
 
 PAGE_WIDTH, PAGE_HEIGHT = pagesizes.LETTER
 text_start_y = PAGE_HEIGHT / 2.0 - inch
@@ -65,7 +66,7 @@ def print_talents(talents, canvas):
 
 def create_name_tent(fname, name, talents, title=None):
     if title is None:
-        title = 'Top {} Talents'.format(len(talents))
+        title = 'Top {} Talents'.format(num2words(len(talents)).capitalize())
     canvas = create_pdf_canvas('TestTent.pdf')
     # print the right side up side
     print_name(name, canvas)
