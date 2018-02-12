@@ -65,9 +65,10 @@ def print_talents(talents, canvas):
             y = text_start_y - (2 * large_line_spacing)
 
 def create_name_tent(fname, name, talents, title=None):
+    load_fonts()
     if title is None:
         title = 'Top {} Talents'.format(num2words(len(talents)).capitalize())
-    canvas = create_pdf_canvas('TestTent.pdf')
+    canvas = create_pdf_canvas(fname)
     # print the right side up side
     print_name(name, canvas)
     print_title(title, canvas)
