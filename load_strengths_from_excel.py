@@ -39,6 +39,21 @@ def InspireU_Mentor_Strengths_HEB_McCollum(ws, output_dir):
         fname = '{}/{}.pdf'.format(output_dir, name)
         render_pdf.create_name_tent(fname, name, strengths)
 
+def HEB_Remaining(ws, output_dir):
+    for row in ws.iter_rows():
+        name = row[0].value
+        if name is None:
+            continue
+        if row[4].value is None:
+            upper = 4
+        else:
+            upper = 6
+        strengths = [row[n].value for n in range(1,upper)]
+        if None in strengths:
+            continue
+        fname = '{}/{}.pdf'.format(output_dir, name)
+        render_pdf.create_name_tent(fname, name, strengths)
+
 def main(xl_fname, output_dir, proc=None):
     wb = openpyxl.load_workbook(xl_fname, read_only=True)
     ws = wb.active
@@ -48,6 +63,8 @@ def main(xl_fname, output_dir, proc=None):
         McCollum_HEB_Student_Strengths(ws, output_dir)
     elif proc == 'InspireU Mentor Strengths- HEB McCollum':
         InspireU_Mentor_Strengths_HEB_McCollum(ws, output_dir)
+    elif proc == 'HEB-remaining':
+        HEB_Remaining(ws, output_dir)
     else:
         print('Unknown processing: {!r}'.format(proc))
 
