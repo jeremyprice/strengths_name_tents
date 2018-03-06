@@ -54,6 +54,17 @@ def HEB_Remaining(ws, output_dir):
         fname = '{}/{}.pdf'.format(output_dir, name)
         render_pdf.create_name_tent(fname, name, strengths)
 
+def Harlandale_HEB_Student_Strengths_Tracker(ws, output_dir):
+    for row in ws.iter_rows():
+        name = row[0].value
+        if name is None:
+            continue
+        strengths = [row[n].value for n in range(1,4)]
+        if None in strengths:
+            continue
+        fname = '{}/{}.pdf'.format(output_dir, name)
+        render_pdf.create_name_tent(fname, name, strengths)
+
 def main(xl_fname, output_dir, proc=None):
     wb = openpyxl.load_workbook(xl_fname, read_only=True)
     ws = wb.active
@@ -65,6 +76,8 @@ def main(xl_fname, output_dir, proc=None):
         InspireU_Mentor_Strengths_HEB_McCollum(ws, output_dir)
     elif proc == 'HEB-remaining':
         HEB_Remaining(ws, output_dir)
+    elif proc == 'Harlandale HEB Student Strengths Tracker':
+        Harlandale_HEB_Student_Strengths_Tracker(ws, output_dir)
     else:
         print('Unknown processing: {!r}'.format(proc))
 
