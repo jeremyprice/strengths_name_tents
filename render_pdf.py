@@ -85,9 +85,13 @@ def create_name_tent(fname, name, talents, title=None):
     canvas.save()
 
 def main():
-    talents = sys.argv[1:]
+    if len(sys.argv) < 3:
+        print('Usage: {} <name> <strength1> ... <strengthN>'.format(sys.argv[0]))
+        raise SystemExit(-1)
+    name = sys.argv[1]
+    talents = sys.argv[2:]
     load_fonts()
-    create_name_tent('TestFonts.pdf', 'Jeremy Price', talents)
+    create_name_tent('{}_strengths.pdf'.format(name), name, talents)
 
 if __name__ == '__main__':
     main()
