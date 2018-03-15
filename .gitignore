@@ -1,6 +1,5 @@
 .venv
 .DS_Store
 pdfs/
-font/
 __pycache__/
 ~$*

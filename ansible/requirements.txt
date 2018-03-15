@@ -1,3 +1,5 @@
+Flask
+gunicorn
 reportlab
 num2words
 pyyaml

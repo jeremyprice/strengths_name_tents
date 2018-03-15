@@ -1,0 +1,90 @@
+---
+  - name: Configure server
+    hosts: strengths-web
+
+    vars:
+      packages:
+        - python-pip
+        - nginx
+        - python-dev
+        - git-all
+      install_directory: /var/app/strengths
+      runtime_user: www-data
+      gunicorn_sock: /run/strengths/socket
+      gunicorn_port: 9000
+      listen_port: 80
+
+    tasks:
+      - name: setup {{ runtime_user }} user
+        user: name={{ runtime_user }} state=present
+
+      - name: install needed packages
+        apt: name={{ packages }} state=latest
+
+      - name: upload python package requirements
+        copy: src=requirements.txt dest=/tmp/requirements.txt
+
+      - name: install python packages
+        pip: requirements=/tmp/requirements.txt state=latest
+
+      - name: create deployment directories
+        file: path={{ install_directory }} state=directory owner={{ runtime_user }}
+
+      - name: create runtime tmp directory
+        file: path=/run/strengths state=directory owner={{ runtime_user }}
+
+      - name: clone the repo
+        git: repo=git://github.com/jeremyprice/strengths_cards
+             dest={{ install_directory }}
+        become: yes
+        become_user: "{{ runtime_user }}"
+        notify:
+          - restart app
+
+      - name: install the system files
+        template: src={{ item.src }} dest={{ item.dest }}
+        notify:
+          - reload systemd
+          - restart app
+        with_items:
+          - { src: "systemd.service.j2", dest: "/lib/systemd/system/strengths.service" }
+          - { src: "systemd.socket.j2", dest: "/lib/systemd/system/strengths.socket" }
+          - { src: "tmpfiles.d.conf.j2", dest: "/usr/lib/tmpfiles.d/strengths.conf" }
+
+      - name: install the nginx config file
+        template: src=nginx.j2 dest=/etc/nginx/sites-available/strengths
+        notify: restart nginx
+
+      - name: enable the strengths site config in nginx
+        file: src=/etc/nginx/sites-available/strengths
+              path=/etc/nginx/sites-enabled/strengths state=link
+        notify: restart nginx
+
+      - name: disable the default nginx site config
+        file: path=/etc/nginx/sites-enabled/default state=absent
+        notify: restart nginx
+
+      - name: make sure we don't close OpenSSH ports in the firewall
+        ufw: rule=limit state=enabled name=OpenSSH
+
+      - name: make sure we don't close ssh ports in the firewall
+        ufw: rule=limit state=enabled port=ssh
+
+      - name: poke a hole in the firewall for the nginx server
+        ufw: proto=tcp rule=allow state=enabled to_port={{ listen_port }}
+
+      - name: ensure nginx and app are started and boot enabled
+        service: name={{ item }} state=started enabled=yes
+        with_items:
+          - nginx
+          - strengths
+
+    handlers:
+      - name: reload systemd
+        command: systemctl daemon-reload
+
+      - name: restart app
+        service: name=strengths state=restarted
+
+      - name: restart nginx
+        service: name=nginx state=restarted
