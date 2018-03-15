@@ -1,2 +1,2 @@
-strengths-web ansible_host=strengths-web
-#strengths-web ansible_host=strengths-web%bastion-lon
+#strengths-web ansible_host=strengths-web
+strengths-web ansible_host=root-strengths-web%bastion

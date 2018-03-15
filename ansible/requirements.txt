@@ -3,4 +3,3 @@ gunicorn
 reportlab
 num2words
 pyyaml
-flask
