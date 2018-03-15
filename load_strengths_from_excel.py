@@ -91,6 +91,8 @@ def main(xl_fname, output_dir, proc=None):
         Harlandale_HEB_Student_Strengths_Tracker(ws, output_dir)
     elif proc == 'InspireU Mentor Strengths- HEB Harlandale HS':
         InspireU_Mentor_Strengths_HEB_Harlandale_HS(ws, output_dir)
+    elif proc == 'Holmes Acelity Student Strengths Tracker':
+        Harlandale_HEB_Student_Strengths_Tracker(ws, output_dir)
     else:
         print('Unknown processing: {!r}'.format(proc))
 
