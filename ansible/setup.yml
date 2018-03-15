@@ -34,7 +34,7 @@
         file: path=/run/strengths state=directory owner={{ runtime_user }}
 
       - name: clone the repo
-        git: repo=git://github.com/jeremyprice/strengths_cards
+        git: repo=git://github.com/jeremyprice/strengths_name_tents
              dest={{ install_directory }}
         become: yes
         become_user: "{{ runtime_user }}"
