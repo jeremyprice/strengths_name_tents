@@ -28,10 +28,12 @@
               {%- for theme in strengthsfinder %}
               <option>{{ theme }}</option>
               {%- endfor %}
-              <option>- StrengthsExplorer Themes</option>
-              {%- for theme in strengthsexplorer %}
-              <option>{{ theme }}</option>
-              {%- endfor %}
+              {%- if strength_idx <=3 %}
+                <option>- StrengthsExplorer Themes</option>
+                {%- for theme in strengthsexplorer %}
+                <option>{{ theme }}</option>
+                {%- endfor %}
+              {%- endif %}
             </select>
           </div>
           {%- endfor %}
