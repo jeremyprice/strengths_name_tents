@@ -1,19 +1,46 @@
 #!/usr/bin/env python3
 
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request, send_from_directory, abort
 import render_pdf
 import yaml
 import os
+import logging
+import logging.handlers
 
+DEBUG = False
+app_log = logging.getLogger('strengths')
 app = Flask(__name__)
 strengths_data = yaml.load(open('strengths_data.yml', 'r').read())
 strengthsfinder = strengths_data['StrengthsFinderThemes']
+s_strengthsfinder = set(strengthsfinder)
 strengthsexplorer  = strengths_data['StrengthsExplorerThemes']
+s_strengthsexplorer = set(strengthsexplorer)
 render_pdf.load_fonts()
-try:
-    os.mkdir('pdfs/')
-except FileExistsError:
-    pass
+
+def setup_paths():
+    for req_path in 'pdfs/', 'logs/':
+        try:
+            os.mkdir(req_path)
+        except FileExistsError:
+            pass
+
+def setup_logging():
+        if DEBUG:
+                loglevel = logging.DEBUG
+        else:
+                loglevel = logging.INFO
+        formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+        # send messages to a rotated log file - rotated every monday
+        flask_handler = logging.handlers.TimedRotatingFileHandler('./logs/flask.log', when='W0')
+        flask_handler.setFormatter(formatter)
+        flask_handler.setLevel(loglevel)
+        app.logger.addHandler(flask_handler)
+        app.logger.setLevel(loglevel)
+        app_handler = logging.handlers.TimedRotatingFileHandler('./logs/app.log', when='W0')
+        app_handler.setFormatter(formatter)
+        app_handler.setLevel(loglevel)
+        app_log.addHandler(app_handler)
+        app_log.setLevel(loglevel)
 
 @app.route('/')
 def index():
@@ -24,34 +51,56 @@ def index():
 def sanity_checks(name, strengths):
     # get rid of the blank strengths
     strengths = list(filter(lambda x: x != '', strengths))
+    if request.form['input-strengths']:
+        # check the magical hidden field
+        app_log.error('Got a value in the hidden field (input-strengths): {}'.format(request.form['input-strengths']))
+        abort(400)
     if not name:
         # check to see that they entered a name
-        return False
+        app_log.error('Name field was blank')
+        abort(400)
     if '- StrengthsFinder Themes' in strengths:
         # need to select a strength
-        return False
+        app_log.error('Had the "StrengthsFinder Themes" in the submission')
+        abort(400)
     if '- StrengthsExplorer Themes' in strengths:
         # need to select a strength
-        return False
-    #TODO: check to make sure we have 3 for explorer or 5 for finder
-    #TODO: check to make sure we didn't select an explorer theme and a finder theme
-    #TODO: check to make sure no duplicates
-    #TODO: return actual errors, not just False
+        app_log.error('Had the "StrengthsExplorer Themes" in the submission')
+        abort(400)
+    s_strengths = set(strengths)
+    if not s_strengths.issubset(s_strengthsfinder) and not s_strengths.issubset(s_strengthsexplorer):
+        # not a full set of finder or explorer
+        app_log.error('not a full set of explorer or finder talents: {}'.format(strengths))
+        abort(400)
+    if s_strengths.issubset(s_strengthsfinder) and len(strengths) != 5:
+        # expected 5 talents for finder
+        app_log.error('Did not supply 5 finder talents: {}'.format(strengths))
+        abort(400)
+    if s_strengths.issubset(s_strengthsexplorer) and len(strengths) != 3:
+        # expected 3 talents for explorer
+        app_log.error('Did not supply 3 explorer talents: {}'.format(strengths))
+        abort(400)
+    if len(s_strengths) != len(strengths):
+        # got a duplicate
+        app_log.error('A duplicate strength was submitted: {}'.format(strengths))
+        abort(400)
     return strengths
 
 @app.route('/generate', methods=['POST'])
 def generate():
     # load info from the post data and generate a PDF and return it
-    # TBD - create a url for each new PDF?
+    app_log.info('Got a submission')
     name = request.form.get('nameInput')
     strengths = [request.form.get('inputStrength{}'.format(idx)) for idx in range(1,6)]
     strengths = sanity_checks(name, strengths)
-    if not strengths:
-        return
+    app_log.info('Name: {}, Strengths: {}'.format(name, strengths))
     fname = '{}_name_tent.pdf'.format(name)
     fdir = 'pdfs/'
     render_pdf.create_name_tent(fdir + fname, name, strengths)
     return send_from_directory(fdir, fname)
 
 if __name__ == '__main__':
-    app.run()
+    setup_paths()
+    setup_logging()
+    app_log.info('Application started')
+    app.run(debug=DEBUG)
