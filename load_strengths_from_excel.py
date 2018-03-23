@@ -76,6 +76,18 @@ def InspireU_Mentor_Strengths_HEB_Harlandale_HS(ws, output_dir):
         fname = '{}/{}.pdf'.format(output_dir, name)
         render_pdf.create_name_tent(fname, name, strengths)
 
+def generic(ws, output_dir):
+    # try the age-old one line per person without header line
+    # name in the first column
+    # strengths in the next columns - 3 for some and 5 for others
+    for row in ws.iter_rows():
+        name = row[0].value
+        if name is None:
+            continue
+        strengths = [row[n].value for n in range(1,ws.max_column) if row[n].value is not None]
+        fname = '{}/{}.pdf'.format(output_dir, name)
+        render_pdf.create_name_tent(fname, name, strengths)
+
 def main(xl_fname, output_dir, proc=None):
     wb = openpyxl.load_workbook(xl_fname, read_only=True)
     ws = wb.active
@@ -94,7 +106,7 @@ def main(xl_fname, output_dir, proc=None):
     elif proc == 'Holmes Acelity Student Strengths Tracker':
         Harlandale_HEB_Student_Strengths_Tracker(ws, output_dir)
     else:
-        print('Unknown processing: {!r}'.format(proc))
+        generic(ws, output_dir)
 
 if __name__ == '__main__':
     proc = sys.argv[1].split('/')[-1].split('.')[0]
