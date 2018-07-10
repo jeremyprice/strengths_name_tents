@@ -91,12 +91,15 @@ def generate():
     # load info from the post data and generate a PDF and return it
     app_log.info('Got a submission')
     name = request.form.get('nameInput')
+    title = request.form.get('titleInput')
+    if title == '':
+        title = None
     strengths = [request.form.get('inputStrength{}'.format(idx)) for idx in range(1,6)]
     strengths = sanity_checks(name, strengths)
-    app_log.info('Name: {}, Strengths: {}'.format(name, strengths))
+    app_log.info('Name: {}, Strengths: {}, Title: {}'.format(name, strengths, title))
     fname = '{}_name_tent.pdf'.format(name)
     fdir = 'pdfs/'
-    render_pdf.create_name_tent(fdir + fname, name, strengths)
+    render_pdf.create_name_tent(fdir + fname, name, strengths, title)
     return send_from_directory(fdir, fname)
 
 if __name__ == '__main__':
