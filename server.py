@@ -72,7 +72,7 @@ def sanity_checks(name, strengths):
         # not a full set of finder or explorer
         app_log.error('not a full set of explorer or finder talents: {}'.format(strengths))
         abort(400)
-    if s_strengths.issubset(s_strengthsfinder) and len(strengths) != 5:
+    if s_strengths.issubset(s_strengthsfinder) and not (len(strengths) == 5 or len(strengths) == 10):
         # expected 5 talents for finder
         app_log.error('Did not supply 5 finder talents: {}'.format(strengths))
         abort(400)
