@@ -94,7 +94,7 @@ def generate():
     title = request.form.get('titleInput')
     if title == '':
         title = None
-    strengths = [request.form.get('inputStrength{}'.format(idx)) for idx in range(1,6)]
+    strengths = [request.form.get('inputStrength{}'.format(idx)) for idx in range(1,11)]
     strengths = sanity_checks(name, strengths)
     app_log.info('Name: {}, Strengths: {}, Title: {}'.format(name, strengths, title))
     fname = '{}_name_tent.pdf'.format(name)
