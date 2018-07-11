@@ -46,7 +46,7 @@ def setup_logging():
 def index():
     # load index.html through the template engine and fire it at the user
     return render_template('index.html', strengthsfinder=strengthsfinder,
-                           strengthsexplorer=strengthsexplorer, input_count=5)
+                           strengthsexplorer=strengthsexplorer, input_count=10)
 
 def sanity_checks(name, strengths):
     # get rid of the blank strengths
