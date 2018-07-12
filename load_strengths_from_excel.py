@@ -3,6 +3,7 @@
 import openpyxl
 import sys
 import render_pdf
+import xlrd
 
 def unwrap_strengths(unw):
     lines = unw.split('\n')
@@ -88,9 +89,40 @@ def generic(ws, output_dir):
         fname = '{}/{}.pdf'.format(output_dir, name)
         render_pdf.create_name_tent(fname, name, strengths)
 
+def full34(ws, output_dir):
+    # try the Gallup format: one line per person with header line
+    # name in the first column
+    # strengths in the next columns - all 34 are avail, but only print 10
+    #TODO: add in 5 or 10 option
+    first_row = True
+    for row in ws.get_rows():
+        if first_row:
+            first_row = False
+            continue
+        name = row[0].value
+        if name is '':
+            return
+        # name is last, first
+        try:
+            name_split = name.split(', ')
+            last_name = ', '.join(name_split[:-1])
+            first_name = name_split[-1]
+        except ValueError:
+            print("Error splitting full name: {}".format(full_name))
+            continue
+        name = '{} {}'.format(first_name, last_name)
+        strengths = [row[n].value for n in range(1,11) if row[n].value is not None]
+        fname = '{}/{}.pdf'.format(output_dir, name)
+        render_pdf.create_name_tent(fname, name, strengths)
+
 def main(xl_fname, output_dir, proc=None):
-    wb = openpyxl.load_workbook(xl_fname, read_only=True)
-    ws = wb.active
+    extension = xl_fname.split('.')[-1]
+    if extension == 'xlsx':
+        wb = openpyxl.load_workbook(xl_fname, read_only=True)
+        ws = wb.active
+    elif extension == 'xls':
+        wb = xlrd.open_workbook(xl_fname)
+        ws = wb.sheet_by_index(0)
     if proc == 'BOA and McCollum':
         BOA_and_McCollum(ws, output_dir)
     elif proc == 'McCollum HEB Student Strengths':
@@ -106,7 +138,7 @@ def main(xl_fname, output_dir, proc=None):
     elif proc == 'Holmes Acelity Student Strengths Tracker':
         Harlandale_HEB_Student_Strengths_Tracker(ws, output_dir)
     else:
-        generic(ws, output_dir)
+        full34(ws, output_dir)
 
 if __name__ == '__main__':
     proc = sys.argv[1].split('/')[-1].split('.')[0]
