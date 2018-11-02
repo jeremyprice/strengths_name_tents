@@ -89,7 +89,7 @@ def generic(ws, output_dir):
         fname = '{}/{}.pdf'.format(output_dir, name)
         render_pdf.create_name_tent(fname, name, strengths)
 
-def full34(ws, output_dir):
+def full34(ws, output_dir, image=None):
     # try the Gallup format: one line per person with header line
     # name in the first column
     # strengths in the next columns - all 34 are avail, but only print 10
@@ -113,9 +113,9 @@ def full34(ws, output_dir):
         name = '{} {}'.format(first_name, last_name)
         strengths = [row[n].value for n in range(1,11) if row[n].value is not None]
         fname = '{}/{}.pdf'.format(output_dir, name)
-        render_pdf.create_name_tent(fname, name, strengths)
+        render_pdf.create_name_tent(fname, name, strengths, image=image)
 
-def main(xl_fname, output_dir, proc=None):
+def main(xl_fname, output_dir, proc=None, image=None):
     extension = xl_fname.split('.')[-1]
     if extension == 'xlsx':
         wb = openpyxl.load_workbook(xl_fname, read_only=True)
@@ -138,8 +138,13 @@ def main(xl_fname, output_dir, proc=None):
     elif proc == 'Holmes Acelity Student Strengths Tracker':
         Harlandale_HEB_Student_Strengths_Tracker(ws, output_dir)
     else:
-        full34(ws, output_dir)
+        full34(ws, output_dir, image)
 
 if __name__ == '__main__':
+    # args: xlsx pdf_dir [png]
     proc = sys.argv[1].split('/')[-1].split('.')[0]
-    main(sys.argv[1], sys.argv[2], proc)
+    if len(sys.argv) == 4:
+        image = sys.argv[3]
+    else:
+        image = None
+    main(sys.argv[1], sys.argv[2], proc, image)

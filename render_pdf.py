@@ -67,7 +67,7 @@ def print_image(name, image, canvas):
     reportlab.platypus.Image(image, width=new_width, height=new_height).drawOn(canvas, x, y)
 
 def print_talents(talents, canvas):
-    canvas.setFont('Comic B', 30)
+    canvas.setFont('Comic B', 25)
     canvas.setStrokeColorRGB(0.0, 0.0, 0.0)
     canvas.setFillColorRGB(0.0, 0.0, 0.0)
     y = text_start_y - (2 * large_line_spacing)
