@@ -1,2 +1,2 @@
-strengths-web ansible_host=root-strengths-web ansible_python_interpreter=/usr/bin/python2.7
-#strengths-web ansible_host=root-strengths-web%bastion ansible_python_interpreter=/usr/bin/python2.7
+#strengths-web ansible_host=root-strengths-web ansible_python_interpreter=/usr/bin/python2.7
+strengths-web ansible_host=root-strengths-web%bastion ansible_python_interpreter=/usr/bin/python2.7

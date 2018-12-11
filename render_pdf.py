@@ -50,18 +50,19 @@ def print_title(title, canvas):
     y = text_start_y - large_line_spacing
     canvas.drawCentredString(PAGE_WIDTH/2.0, y, title)
 
-def print_image(name, image, canvas):
-    canvas.setFont('Comic B', 40)
+def print_image(name, image, canvas, scaling=1.0, font_scaling=1.0):
+    font_size = int(40 * font_scaling)
+    canvas.setFont('Comic B', font_size)
     canvas.setStrokeColorRGB(0.0, 0.0, 0.0)
     canvas.setFillColorRGB(0.0, 0.0, 0.0)
-    y = text_start_y - (1.*large_line_spacing)
-    canvas.drawCentredString(PAGE_WIDTH/2.0, y, name)
+    y = text_start_y - (scaling * large_line_spacing) - ((scaling - 0.5) * inch)
+    canvas.drawCentredString(PAGE_WIDTH / 2.0, y, name)
     im = Image.open(image)
     im_w, im_h = im.size
-    new_height = large_line_spacing * 1.5
+    new_height = large_line_spacing * 1.5 * scaling
     scale = new_height / im_h
     new_width = im_w * scale
-    y = text_start_y
+    y = text_start_y - ((scaling - 1.0) * inch)
     x = (PAGE_WIDTH / 2) - (new_width / 2)
     #TODO: center picture and scale appropriately
     reportlab.platypus.Image(image, width=new_width, height=new_height).drawOn(canvas, x, y)
@@ -89,7 +90,10 @@ def create_name_tent(fname, name, talents, title=None, image=None):
     canvas = create_pdf_canvas(fname)
     # print the right side up side
     if image:
-        print_image(name, image, canvas)
+        if len(talents) > 0:
+            print_image(name, image, canvas)
+        else:
+            print_image(name, image, canvas, scaling=1.5, font_scaling=1.5)
     else:
         print_name(name, canvas)
         print_title(title, canvas)
@@ -100,7 +104,10 @@ def create_name_tent(fname, name, talents, title=None, image=None):
     canvas.rotate(180)
 
     if image:
-        print_image(name, image, canvas)
+        if len(talents) > 0:
+            print_image(name, image, canvas)
+        else:
+            print_image(name, image, canvas, scaling=1.5, font_scaling=1.5)
     else:
         print_name(name, canvas)
         print_title(title, canvas)

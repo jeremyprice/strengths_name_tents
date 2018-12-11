@@ -140,8 +140,19 @@ def main(xl_fname, output_dir, proc=None, image=None):
     else:
         full34(ws, output_dir, image)
 
+def alp():
+    with open(sys.argv[1], 'r') as infile:
+        names = infile.read().splitlines()
+    output_dir = sys.argv[2]
+    image = sys.argv[3]
+    for name in names:
+        fname = '{}/{}.pdf'.format(output_dir, name)
+        render_pdf.create_name_tent(fname, name, [], image=image)
+
 if __name__ == '__main__':
     # args: xlsx pdf_dir [png]
+    alp()
+    raise SystemExit()
     proc = sys.argv[1].split('/')[-1].split('.')[0]
     if len(sys.argv) == 4:
         image = sys.argv[3]
