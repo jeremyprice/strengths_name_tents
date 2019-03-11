@@ -5,9 +5,11 @@ import sys
 import render_pdf
 import xlrd
 
+
 def unwrap_strengths(unw):
     lines = unw.split('\n')
     return [u.split('.')[1].strip() for u in lines]
+
 
 def BOA_and_McCollum(ws, output_dir):
     for row in ws.iter_rows(min_row=3):
@@ -20,6 +22,7 @@ def BOA_and_McCollum(ws, output_dir):
         fname = '{}/{}.pdf'.format(output_dir, mentee_name)
         render_pdf.create_name_tent(fname, mentee_name, mentee_strengths)
 
+
 def McCollum_HEB_Student_Strengths(ws, output_dir):
     for row in ws.iter_rows(min_row=2):
         mentee_name = row[0].value
@@ -29,16 +32,18 @@ def McCollum_HEB_Student_Strengths(ws, output_dir):
         fname = '{}/{}.pdf'.format(output_dir, mentee_name)
         render_pdf.create_name_tent(fname, mentee_name, mentee_strengths)
 
+
 def InspireU_Mentor_Strengths_HEB_McCollum(ws, output_dir):
     for row in ws.iter_rows(min_row=2):
         name = row[0].value
         if name is None:
             continue
-        strengths = [row[n].value for n in range(1,6)]
+        strengths = [row[n].value for n in range(1, 6)]
         if None in strengths:
             continue
         fname = '{}/{}.pdf'.format(output_dir, name)
         render_pdf.create_name_tent(fname, name, strengths)
+
 
 def HEB_Remaining(ws, output_dir):
     for row in ws.iter_rows():
@@ -49,33 +54,36 @@ def HEB_Remaining(ws, output_dir):
             upper = 4
         else:
             upper = 6
-        strengths = [row[n].value for n in range(1,upper)]
+        strengths = [row[n].value for n in range(1, upper)]
         if None in strengths:
             continue
         fname = '{}/{}.pdf'.format(output_dir, name)
         render_pdf.create_name_tent(fname, name, strengths)
+
 
 def Harlandale_HEB_Student_Strengths_Tracker(ws, output_dir):
     for row in ws.iter_rows():
         name = row[0].value
         if name is None:
             continue
-        strengths = [row[n].value for n in range(1,4)]
+        strengths = [row[n].value for n in range(1, 4)]
         if None in strengths:
             continue
         fname = '{}/{}.pdf'.format(output_dir, name)
         render_pdf.create_name_tent(fname, name, strengths)
+
 
 def InspireU_Mentor_Strengths_HEB_Harlandale_HS(ws, output_dir):
     for row in ws.iter_rows():
         name = row[0].value
         if name is None:
             continue
-        strengths = [row[n].value for n in range(1,6)]
+        strengths = [row[n].value for n in range(1, 6)]
         if None in strengths:
             continue
         fname = '{}/{}.pdf'.format(output_dir, name)
         render_pdf.create_name_tent(fname, name, strengths)
+
 
 def generic(ws, output_dir):
     # try the age-old one line per person without header line
@@ -85,22 +93,23 @@ def generic(ws, output_dir):
         name = row[0].value
         if name is None:
             continue
-        strengths = [row[n].value for n in range(1,ws.max_column) if row[n].value is not None]
+        strengths = [row[n].value for n in range(1, ws.max_column) if row[n].value is not None]
         fname = '{}/{}.pdf'.format(output_dir, name)
         render_pdf.create_name_tent(fname, name, strengths)
 
-def full34(ws, output_dir, image=None):
+
+def full34(ws, output_dir, image=None, mbti=False):
     # try the Gallup format: one line per person with header line
     # name in the first column
     # strengths in the next columns - all 34 are avail, but only print 10
-    #TODO: add in 5 or 10 option
+    # TODO: add in 5 or 10 option
     first_row = True
     for row in ws.get_rows():
         if first_row:
             first_row = False
             continue
         name = row[0].value
-        if name is '':
+        if name == '':
             return
         # name is last, first
         try:
@@ -108,15 +117,21 @@ def full34(ws, output_dir, image=None):
             last_name = ', '.join(name_split[:-1])
             first_name = name_split[-1]
         except ValueError:
-            print("Error splitting full name: {}".format(full_name))
+            print("Error splitting full name: {}".format(name))
             continue
         name = '{} {}'.format(first_name, last_name)
-        strengths = [row[n].value for n in range(1,11) if row[n].value is not None]
         nospace = name.replace(' ', '')
         fname = '{}/{}-nametent.pdf'.format(output_dir, nospace)
-        render_pdf.create_name_tent(fname, name, strengths, image=image)
+        if mbti:
+            title = row[1].value
+            strengths = [row[n].value for n in range(2, 12) if row[n].value is not None]
+            render_pdf.create_name_tent(fname, name, strengths, title=title, image=image)
+        else:
+            strengths = [row[n].value for n in range(1, 11) if row[n].value is not None]
+            render_pdf.create_name_tent(fname, name, strengths, image=image)
 
-def main(xl_fname, output_dir, proc=None, image=None):
+
+def main(xl_fname, output_dir, proc=None, image=None, mbti=False):
     extension = xl_fname.split('.')[-1]
     if extension == 'xlsx':
         wb = openpyxl.load_workbook(xl_fname, read_only=True)
@@ -139,7 +154,19 @@ def main(xl_fname, output_dir, proc=None, image=None):
     elif proc == 'Holmes Acelity Student Strengths Tracker':
         Harlandale_HEB_Student_Strengths_Tracker(ws, output_dir)
     else:
-        full34(ws, output_dir, image)
+        full34(ws, output_dir, image, mbti)
+
+
+def MBTI(xl_fname, output_dir, proc=None, image=None):
+    extension = xl_fname.split('.')[-1]
+    if extension == 'xlsx':
+        wb = openpyxl.load_workbook(xl_fname, read_only=True)
+        ws = wb.active
+    elif extension == 'xls':
+        wb = xlrd.open_workbook(xl_fname)
+        ws = wb.sheet_by_index(0)
+    full34(ws, output_dir, image)
+
 
 def alp():
     with open(sys.argv[1], 'r') as infile:
@@ -148,8 +175,9 @@ def alp():
     image = sys.argv[3]
     for name in names:
         nospace = name.replace(' ', '')
-        fname = '{}/{}-nametent.pdf'.format(output_dir, name)
+        fname = '{}/{}-nametent.pdf'.format(output_dir, nospace)
         render_pdf.create_name_tent(fname, name, [], image=image)
+
 
 if __name__ == '__main__':
     # args: xlsx pdf_dir [png]
