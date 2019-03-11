@@ -5,7 +5,7 @@ import os
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.pdfbase.pdfmetrics import stringWidth
+# from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib import pagesizes
 from reportlab.lib.units import inch
 from num2words import num2words
@@ -17,12 +17,14 @@ text_start_y = PAGE_HEIGHT / 2.0 - (1.5*inch)
 large_line_spacing = 45
 small_line_spacing = 35
 
+
 def load_fonts():
     folder = 'font'
     comic_ttf = os.path.join(folder, 'comic.ttf')
     comicb_ttf = os.path.join(folder, 'comicbd.ttf')
     pdfmetrics.registerFont(TTFont("Comic", comic_ttf))
     pdfmetrics.registerFont(TTFont("Comic B", comicb_ttf))
+
 
 def set_pdf_file_defaults(canvas):
     canvas.setAuthor('Rackspace University')
@@ -31,10 +33,12 @@ def set_pdf_file_defaults(canvas):
     canvas.setTitle('Top Talents Name Tent')
     canvas.setPageSize(pagesizes.LETTER)
 
+
 def create_pdf_canvas(fname):
     canvas = Canvas(fname)
     set_pdf_file_defaults(canvas)
     return canvas
+
 
 def print_name(name, canvas):
     canvas.setFont('Comic B', 40)
@@ -43,12 +47,14 @@ def print_name(name, canvas):
     y = text_start_y
     canvas.drawCentredString(PAGE_WIDTH/2.0, y, name)
 
+
 def print_title(title, canvas):
     canvas.setFont('Comic B', 32)
     canvas.setStrokeColorRGB(1.0, 0.0, 0.0)
     canvas.setFillColorRGB(1.0, 0.0, 0.0)
     y = text_start_y - large_line_spacing
     canvas.drawCentredString(PAGE_WIDTH/2.0, y, title)
+
 
 def print_image(name, image, canvas, scaling=1.0, font_scaling=1.0):
     font_size = int(40 * font_scaling)
@@ -64,8 +70,9 @@ def print_image(name, image, canvas, scaling=1.0, font_scaling=1.0):
     new_width = im_w * scale
     y = text_start_y - ((scaling - 1.0) * inch)
     x = (PAGE_WIDTH / 2) - (new_width / 2)
-    #TODO: center picture and scale appropriately
+    # TODO: center picture and scale appropriately
     reportlab.platypus.Image(image, width=new_width, height=new_height).drawOn(canvas, x, y)
+
 
 def print_talents(talents, canvas):
     canvas.setFont('Comic B', 25)
@@ -82,6 +89,7 @@ def print_talents(talents, canvas):
         if idx == 4:
             x = 7.3 * PAGE_WIDTH / 10.0
             y = text_start_y - (2 * large_line_spacing)
+
 
 def create_name_tent(fname, name, talents, title=None, image=None):
     load_fonts()
@@ -116,6 +124,7 @@ def create_name_tent(fname, name, talents, title=None, image=None):
     canvas.showPage()
     canvas.save()
 
+
 def main():
     if os.path.isfile(sys.argv[1]):
         image = sys.argv[1]
@@ -129,6 +138,7 @@ def main():
         name = sys.argv[1]
         talents = sys.argv[2:]
         create_name_tent('{}_strengths.pdf'.format(name), name, talents)
+
 
 if __name__ == '__main__':
     main()
