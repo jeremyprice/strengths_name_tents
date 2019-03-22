@@ -61,7 +61,7 @@ def print_image(name, image, canvas, scaling=1.0, font_scaling=1.0):
     canvas.setFont('Comic B', font_size)
     canvas.setStrokeColorRGB(0.0, 0.0, 0.0)
     canvas.setFillColorRGB(0.0, 0.0, 0.0)
-    y = text_start_y - (scaling * large_line_spacing) - ((scaling - 0.5) * inch)
+    y = text_start_y - (scaling * large_line_spacing) - ((scaling - 1.0) * inch)
     canvas.drawCentredString(PAGE_WIDTH / 2.0, y, name)
     im = Image.open(image)
     im_w, im_h = im.size
