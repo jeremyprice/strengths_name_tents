@@ -13,9 +13,10 @@ app = Flask(__name__)
 strengths_data = yaml.load(open('strengths_data.yml', 'r').read())
 strengthsfinder = strengths_data['StrengthsFinderThemes']
 s_strengthsfinder = set(strengthsfinder)
-strengthsexplorer  = strengths_data['StrengthsExplorerThemes']
+strengthsexplorer = strengths_data['StrengthsExplorerThemes']
 s_strengthsexplorer = set(strengthsexplorer)
 render_pdf.load_fonts()
+
 
 def setup_paths():
     for req_path in 'pdfs/', 'logs/':
@@ -24,23 +25,25 @@ def setup_paths():
         except FileExistsError:
             pass
 
+
 def setup_logging():
-        if DEBUG:
-                loglevel = logging.DEBUG
-        else:
-                loglevel = logging.INFO
-        formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-        # send messages to a rotated log file - rotated every monday
-        flask_handler = logging.handlers.TimedRotatingFileHandler('./logs/flask.log', when='W0')
-        flask_handler.setFormatter(formatter)
-        flask_handler.setLevel(loglevel)
-        app.logger.addHandler(flask_handler)
-        app.logger.setLevel(loglevel)
-        app_handler = logging.handlers.TimedRotatingFileHandler('./logs/app.log', when='W0')
-        app_handler.setFormatter(formatter)
-        app_handler.setLevel(loglevel)
-        app_log.addHandler(app_handler)
-        app_log.setLevel(loglevel)
+    if DEBUG:
+        loglevel = logging.DEBUG
+    else:
+        loglevel = logging.INFO
+    formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+    # send messages to a rotated log file - rotated every monday
+    flask_handler = logging.handlers.TimedRotatingFileHandler('./logs/flask.log', when='W0')
+    flask_handler.setFormatter(formatter)
+    flask_handler.setLevel(loglevel)
+    app.logger.addHandler(flask_handler)
+    app.logger.setLevel(loglevel)
+    app_handler = logging.handlers.TimedRotatingFileHandler('./logs/app.log', when='W0')
+    app_handler.setFormatter(formatter)
+    app_handler.setLevel(loglevel)
+    app_log.addHandler(app_handler)
+    app_log.setLevel(loglevel)
+
 
 @app.route('/')
 def index():
@@ -48,12 +51,14 @@ def index():
     return render_template('index.html', strengthsfinder=strengthsfinder,
                            strengthsexplorer=strengthsexplorer, input_count=10)
 
+
 def sanity_checks(name, strengths):
     # get rid of the blank strengths
     strengths = list(filter(lambda x: x != '', strengths))
     if request.form['input-strengths']:
         # check the magical hidden field
-        app_log.error('Got a value in the hidden field (input-strengths): {}'.format(request.form['input-strengths']))
+        hidden = request.form['input-strengths']
+        app_log.error('Got a value in the hidden field (input-strengths): {}'.format(hidden))
         abort(400)
     if not name:
         # check to see that they entered a name
@@ -86,6 +91,7 @@ def sanity_checks(name, strengths):
         abort(400)
     return strengths
 
+
 @app.route('/generate', methods=['POST'])
 def generate():
     # load info from the post data and generate a PDF and return it
@@ -94,13 +100,14 @@ def generate():
     title = request.form.get('titleInput')
     if title == '':
         title = None
-    strengths = [request.form.get('inputStrength{}'.format(idx)) for idx in range(1,11)]
+    strengths = [request.form.get('inputStrength{}'.format(idx)) for idx in range(1, 11)]
     strengths = sanity_checks(name, strengths)
     app_log.info('Name: {}, Strengths: {}, Title: {}'.format(name, strengths, title))
     fname = '{}_name_tent.pdf'.format(name)
     fdir = 'pdfs/'
     render_pdf.create_name_tent(fdir + fname, name, strengths, title)
     return send_from_directory(fdir, fname)
+
 
 if __name__ == '__main__':
     setup_paths()
