@@ -19,7 +19,7 @@ render_pdf.load_fonts()
 
 
 def setup_paths():
-    for req_path in 'pdfs/', 'logs/':
+    for req_path in ('pdfs/', 'logs/', 'python/'):
         try:
             os.mkdir(req_path)
         except FileExistsError:
@@ -107,6 +107,11 @@ def generate():
     fdir = 'pdfs/'
     render_pdf.create_name_tent(fdir + fname, name, strengths, title)
     return send_from_directory(fdir, fname)
+
+
+@app.route('/python/<fname>')
+def serve_python(fname):
+    return send_from_directory('python/', fname)
 
 
 if __name__ == '__main__':
