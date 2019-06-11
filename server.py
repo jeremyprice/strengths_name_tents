@@ -6,11 +6,12 @@ import yaml
 import os
 import logging
 import logging.handlers
+import glob
 
 DEBUG = False
 app_log = logging.getLogger('strengths')
 app = Flask(__name__)
-strengths_data = yaml.load(open('strengths_data.yml', 'r').read())
+strengths_data = yaml.safe_load(open('strengths_data.yml', 'r').read())
 strengthsfinder = strengths_data['StrengthsFinderThemes']
 s_strengthsfinder = set(strengthsfinder)
 strengthsexplorer = strengths_data['StrengthsExplorerThemes']
@@ -107,6 +108,12 @@ def generate():
     fdir = 'pdfs/'
     render_pdf.create_name_tent(fdir + fname, name, strengths, title)
     return send_from_directory(fdir, fname)
+
+
+@app.route('/python/')
+def python_dir_list():
+    files = sorted(os.listdir('python/'))
+    return render_template('files.html', files=files, path='Python')
 
 
 @app.route('/python/<fname>')

@@ -1,0 +1,8 @@
+<!doctype html>
+<title>Path: {{ path }}</title>
+<h1>{{ path }}</h1>
+<ul>
+    {% for file in files %}
+    <li><a href="{{ file }}">{{ file }}</a></li>
+    {% endfor %}
+</ul>
