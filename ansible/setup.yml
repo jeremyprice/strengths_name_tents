@@ -10,11 +10,12 @@
         - python3-dev
         - git-all
         - ufw
+        - aptitude
       install_directory: /var/app/strengths
       runtime_user: www-data
       gunicorn_sock: /run/strengths/socket
-      gunicorn_port: 9000
-      listen_port: 80
+      gunicorn_port: "9000"
+      listen_port: "80"
 
     tasks:
       - name: setup {{ runtime_user }} user

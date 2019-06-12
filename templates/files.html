@@ -1,8 +1,24 @@
 <!doctype html>
-<title>Path: {{ path }}</title>
-<h1>{{ path }}</h1>
-<ul>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>Path: {{ path }}</title>
+  </head>
+  <body>
+    <h1>{{ path }}</h1>
+    <div class="container">
     {% for file in files %}
-    <li><a href="{{ file }}">{{ file }}</a></li>
+      <div class="row mt-3">
+        <div class="col">
+          <a class="btn btn-dark" href="{{ file }}" role="button">{{ file }}</a><br>
+        </div>
+      </div>
     {% endfor %}
-</ul>
+  </body>
+</html>
