@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
-from flask import Flask, render_template, request, send_from_directory, abort
+from flask import Flask, render_template, request, send_from_directory, redirect, url_for
 import render_pdf
 import yaml
 import os
 import logging
 import logging.handlers
-import glob
 
 DEBUG = False
 app_log = logging.getLogger('strengths')
@@ -60,41 +59,43 @@ def sanity_checks(name, strengths):
         # check the magical hidden field
         hidden = request.form['input-strengths']
         app_log.error('Got a value in the hidden field (input-strengths): {}'.format(hidden))
-        abort(400)
+        return "Error: Invalid request values"
     if not name:
         # check to see that they entered a name
         app_log.error('Name field was blank')
-        abort(400)
+        return "Error: you must specify a name"
     if '- StrengthsFinder Themes' in strengths:
         # need to select a strength
         app_log.error('Had the "StrengthsFinder Themes" in the submission')
-        abort(400)
+        return "Error: you didn't select enough talent theme"
     if '- StrengthsExplorer Themes' in strengths:
         # need to select a strength
         app_log.error('Had the "StrengthsExplorer Themes" in the submission')
-        abort(400)
+        return "Error: you didn't select enough talent themes"
     s_strengths = set(strengths)
     if not s_strengths.issubset(s_strengthsfinder) and not s_strengths.issubset(s_strengthsexplorer):
         # not a full set of finder or explorer
         app_log.error('not a full set of explorer or finder talents: {}'.format(strengths))
-        abort(400)
+        return "Error: you selected some StrengthsFinder and some StrengthsExplorer themes"
     if s_strengths.issubset(s_strengthsfinder) and not (len(strengths) == 5 or len(strengths) == 10):
         # expected 5 talents for finder
         app_log.error('Did not supply 5 finder talents: {}'.format(strengths))
-        abort(400)
+        return "Error: must enter 5 or 10 StrengthsFinder talents"
     if s_strengths.issubset(s_strengthsexplorer) and len(strengths) != 3:
         # expected 3 talents for explorer
         app_log.error('Did not supply 3 explorer talents: {}'.format(strengths))
-        abort(400)
+        return "Error: must enter 3 explorer talents"
     if len(s_strengths) != len(strengths):
         # got a duplicate
         app_log.error('A duplicate strength was submitted: {}'.format(strengths))
-        abort(400)
+        return "Error: had a duplicate talent in the list"
     return strengths
 
 
-@app.route('/generate', methods=['POST'])
+@app.route('/generate', methods=['POST', 'GET'])
 def generate():
+    if request.method == 'GET':  # if we have a GET, send them to the root
+        return redirect('/')
     # load info from the post data and generate a PDF and return it
     app_log.info('Got a submission')
     name = request.form.get('nameInput')
@@ -103,6 +104,8 @@ def generate():
         title = None
     strengths = [request.form.get('inputStrength{}'.format(idx)) for idx in range(1, 11)]
     strengths = sanity_checks(name, strengths)
+    if isinstance(strengths, str):
+        return strengths, 400
     app_log.info('Name: {}, Strengths: {}, Title: {}'.format(name, strengths, title))
     fname = '{}_name_tent.pdf'.format(name)
     fdir = 'pdfs/'
