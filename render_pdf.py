@@ -21,6 +21,7 @@ RACKSPACE_RED_RGB = (0.88, 0.15, 0.18)
 RACKSPACE_GREY_RGB = (0.2, 0.2, 0.2)
 RACKSPACE_TEXT_RGB = (0.25, 0.25, 0.25)
 LEFT_X = 0.75 * inch
+LEFT_2ND_COL = 4.0 * inch
 
 
 def load_fonts():
@@ -105,15 +106,12 @@ def print_talents(talents, canvas):
     canvas.setStrokeColorRGB(*RACKSPACE_TEXT_RGB)
     canvas.setFillColorRGB(*RACKSPACE_TEXT_RGB)
     y = text_start_y - (2 * large_line_spacing)
-    if len(talents) > 5:
-        x = 2.7 * PAGE_WIDTH / 10.0
-    else:
-        x = LEFT_X
+    x = LEFT_X
     for idx, talent in enumerate(talents):
         canvas.drawString(x, y, talent)
         y -= small_line_spacing
         if idx == 4:
-            x = 7.3 * PAGE_WIDTH / 10.0
+            x = LEFT_2ND_COL
             y = text_start_y - (2 * large_line_spacing)
 
 
@@ -171,11 +169,11 @@ def main():
         if len(sys.argv) < 3:
             print('Usage: {} <name> <title> <strength1> ... <strengthN>'.format(sys.argv[0]))
             raise SystemExit(-1)
-        if len(sys.argv) == 8:
+        if len(sys.argv) == 8 or len(sys.argv) == 13:
             name = sys.argv[1]
             title = sys.argv[2]
             talents = sys.argv[3:]
-        elif len(sys.argv) == 7:
+        elif len(sys.argv) == 7 or len(sys.argv) == 12:
             name = sys.argv[1]
             title = None
             talents = sys.argv[2:]
