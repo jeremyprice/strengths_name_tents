@@ -22,6 +22,8 @@ RACKSPACE_GREY_RGB = (0.2, 0.2, 0.2)
 RACKSPACE_TEXT_RGB = (0.25, 0.25, 0.25)
 LEFT_X = 0.75 * inch
 LEFT_2ND_COL = 4.0 * inch
+IMAGE_MAX_WIDTH = LEFT_2ND_COL - LEFT_X
+IMAGE_MAX_HEIGHT = 2.5 * inch
 
 
 def load_fonts():
@@ -86,10 +88,16 @@ def print_lines(canvas):
 def print_image(image, canvas, scaling=1.0, font_scaling=1.0):
     im = Image.open(image)
     im_w, im_h = im.size
-    new_height = 2.5 * inch
+    new_height = IMAGE_MAX_HEIGHT
     scale = new_height / im_h
     new_width = im_w * scale
-    y = text_start_y - new_height - (2 * small_line_spacing)
+    if new_width > IMAGE_MAX_WIDTH:
+        # image is too wide
+        new_width = IMAGE_MAX_WIDTH
+        scale = new_width / im_w
+        new_height = im_h * scale
+    offset = IMAGE_MAX_HEIGHT/2 + new_height/2
+    y = text_start_y - offset - (2 * small_line_spacing)
     x = LEFT_X
     # TODO: center picture and scale appropriately
     reportlab.platypus.Image(image, width=new_width, height=new_height).drawOn(canvas, x, y)

@@ -23,12 +23,29 @@
           <input type="text" class="form-control" id="titleInput" name="titleInput" placeholder="Job Title"/>
         </div>
         <div class="form-row">
+          <div class="form-group col">
+            <label for="imageInput">Image (Top 5 only)</label>
+            <select id="imageInput" name="imageInput" class="form-control">
+              <option selected></option>
+              {%- for image in image_options.keys() %}
+              <option>{{ image }}</option>
+              {%- endfor %}
+            </select>
+          </div>
+          <div class="form-group col">
+            <label for="useLogoInput">Insert Rackspace Logo?</label>
+            <select id="useLogoInput" name="useLogoInput" class="form-control">
+              <option selected>Yes</option>
+              <option>No</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
           {%- for strength_idx in range(1, input_count+1) %}
           <div class="form-group col">
             <label for="inputStrength{{ strength_idx }}">Talent {{ strength_idx }}</label>
             <select id="inputStrength{{ strength_idx }}" name="inputStrength{{ strength_idx }}" class="form-control">
               <option selected></option>
-              <option>- StrengthsFinder Themes</option>
               {%- for theme in strengthsfinder %}
               <option>{{ theme }}</option>
               {%- endfor %}

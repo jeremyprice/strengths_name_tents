@@ -13,6 +13,7 @@ app = Flask(__name__)
 strengths_data = yaml.safe_load(open('strengths_data.yml', 'r').read())
 strengthsfinder = strengths_data['StrengthsFinderThemes']
 s_strengthsfinder = set(strengthsfinder)
+image_options = strengths_data['images']
 render_pdf.load_fonts()
 
 
@@ -47,10 +48,10 @@ def setup_logging():
 def index():
     # load index.html through the template engine and fire it at the user
     return render_template('index.html', strengthsfinder=strengthsfinder,
-                           input_count=10)
+                           image_options=image_options, input_count=10)
 
 
-def sanity_checks(name, strengths):
+def sanity_checks(name, strengths, image, rax_logo):
     # get rid of the blank strengths
     strengths = list(filter(lambda x: x != '', strengths))
     if request.form['input-strengths']:
@@ -79,6 +80,10 @@ def sanity_checks(name, strengths):
         # got a duplicate
         app_log.error('A duplicate strength was submitted: {}'.format(strengths))
         return "Error: had a duplicate talent in the list"
+    if len(strengths) > 5 and image:
+        # can only do top 5 with an image
+        app_log.error('Image selected with more than top 5')
+        return "Error: Cannot select an image for more than top 5"
     return strengths
 
 
@@ -90,17 +95,31 @@ def generate():
     app_log.info('Got a submission')
     name = request.form.get('nameInput')
     title = request.form.get('titleInput')
+    image = request.form.get('imageInput')
+    if image == "":
+        image = None
+    else:
+        try:
+            image = os.path.join('images', image_options[image])
+        except KeyError:
+            app_log.warning('Invalid image submitted: {}'.format(image))
+            image = None
+    rax_logo = request.form.get('useLogoInput')
+    if rax_logo == "Yes":
+        rax_logo = True
+    else:
+        rax_logo = False
     if title == '':
         title = None
     strengths = [request.form.get('inputStrength{}'.format(idx)) for idx in range(1, 11)]
-    strengths = sanity_checks(name, strengths)
+    strengths = sanity_checks(name, strengths, image, rax_logo)
     if isinstance(strengths, str):
         return strengths, 400
     app_log.info('Name: {}, Strengths: {}, Title: {}'.format(name, strengths, title))
     fname = '{}_name_tent.pdf'.format(name)
     fdir = 'pdfs/'
-    render_pdf.create_name_tent(fdir + fname, name, strengths, title)
-    return send_from_directory(fdir, fname)
+    render_pdf.create_name_tent(fdir + fname, name, strengths, title, image=image, logo=rax_logo)
+    return send_from_directory(fdir, fname, as_attachment=True)
 
 
 @app.route('/python/')
