@@ -124,7 +124,7 @@ def print_logo(logo, canvas):
     reportlab.platypus.Image(logo, width=new_width, height=new_height).drawOn(canvas, x, y)
 
 
-def create_name_tent(fname, name, talents, title=None, image=None):
+def create_name_tent(fname, name, talents, title=None, image=None, logo=True):
     load_fonts()
     # if title is None:
     #     title = 'Top {} Talents'.format(num2words(len(talents)).capitalize())
@@ -140,7 +140,8 @@ def create_name_tent(fname, name, talents, title=None, image=None):
     else:
         print_name_and_title(name, title, canvas)
     print_lines(canvas)
-    print_logo('images/rackspace-logo.png', canvas)
+    if logo:
+        print_logo('images/rackspace-logo.png', canvas)
     # print the upside down side
     canvas.saveState()
     canvas.translate(PAGE_WIDTH, PAGE_HEIGHT)
@@ -156,7 +157,8 @@ def create_name_tent(fname, name, talents, title=None, image=None):
     else:
         print_name_and_title(name, title, canvas)
     print_lines(canvas)
-    print_logo('images/rackspace-logo.png', canvas)
+    if logo:
+        print_logo('images/rackspace-logo.png', canvas)
     canvas.restoreState()
     canvas.showPage()
     canvas.save()

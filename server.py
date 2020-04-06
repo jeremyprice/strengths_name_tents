@@ -13,8 +13,6 @@ app = Flask(__name__)
 strengths_data = yaml.safe_load(open('strengths_data.yml', 'r').read())
 strengthsfinder = strengths_data['StrengthsFinderThemes']
 s_strengthsfinder = set(strengthsfinder)
-strengthsexplorer = strengths_data['StrengthsExplorerThemes']
-s_strengthsexplorer = set(strengthsexplorer)
 render_pdf.load_fonts()
 
 
@@ -49,7 +47,7 @@ def setup_logging():
 def index():
     # load index.html through the template engine and fire it at the user
     return render_template('index.html', strengthsfinder=strengthsfinder,
-                           strengthsexplorer=strengthsexplorer, input_count=10)
+                           input_count=10)
 
 
 def sanity_checks(name, strengths):
@@ -68,23 +66,15 @@ def sanity_checks(name, strengths):
         # need to select a strength
         app_log.error('Had the "StrengthsFinder Themes" in the submission')
         return "Error: you didn't select enough talent theme"
-    if '- StrengthsExplorer Themes' in strengths:
-        # need to select a strength
-        app_log.error('Had the "StrengthsExplorer Themes" in the submission')
-        return "Error: you didn't select enough talent themes"
     s_strengths = set(strengths)
-    if not s_strengths.issubset(s_strengthsfinder) and not s_strengths.issubset(s_strengthsexplorer):
-        # not a full set of finder or explorer
-        app_log.error('not a full set of explorer or finder talents: {}'.format(strengths))
-        return "Error: you selected some StrengthsFinder and some StrengthsExplorer themes"
+    if not s_strengths.issubset(s_strengthsfinder):
+        # not a full set of finder
+        app_log.error('not a full set finder talents: {}'.format(strengths))
+        return "Error: you selected some items that are not StrengthsFinder themes"
     if s_strengths.issubset(s_strengthsfinder) and not (len(strengths) == 5 or len(strengths) == 10):
         # expected 5 talents for finder
         app_log.error('Did not supply 5 finder talents: {}'.format(strengths))
         return "Error: must enter 5 or 10 StrengthsFinder talents"
-    if s_strengths.issubset(s_strengthsexplorer) and len(strengths) != 3:
-        # expected 3 talents for explorer
-        app_log.error('Did not supply 3 explorer talents: {}'.format(strengths))
-        return "Error: must enter 3 explorer talents"
     if len(s_strengths) != len(strengths):
         # got a duplicate
         app_log.error('A duplicate strength was submitted: {}'.format(strengths))
