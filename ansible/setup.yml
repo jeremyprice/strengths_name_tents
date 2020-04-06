@@ -27,11 +27,11 @@
       - name: upload python package requirements
         copy: src=requirements.txt dest=/tmp/requirements.txt
 
-      # - name: install python packages
-      #   pip:
-      #     requirements: /tmp/requirements.txt
-      #     state: latest
-      #     executable: pip3
+      - name: install python packages
+        pip:
+          requirements: /tmp/requirements.txt
+          state: latest
+          executable: pip3
 
       - name: create deployment directories
         file: path={{ install_directory }} state=directory owner={{ runtime_user }}
