@@ -134,8 +134,9 @@ def serve_python(fname):
     return send_from_directory('python/', fname)
 
 
+setup_paths()
+setup_logging()
+
 if __name__ == '__main__':
-    setup_paths()
-    setup_logging()
     app_log.info('Application started')
     app.run(debug=DEBUG)
