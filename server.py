@@ -82,8 +82,9 @@ def sanity_checks(name, strengths, image, rax_logo):
         return "Error: had a duplicate talent in the list"
     if len(strengths) > 5 and image:
         # can only do top 5 with an image
-        app_log.error('Image selected with more than top 5')
-        return "Error: Cannot select an image for more than top 5"
+        # trim the Strengths to top 5 only
+        app_log.warning('Image selected with more than top 5')
+        strengths = strengths[:5]
     return strengths
 
 
