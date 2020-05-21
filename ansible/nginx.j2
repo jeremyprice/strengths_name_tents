@@ -1,12 +1,12 @@
 server {
-    listen {{ listen_port }};
-    server_name {{ ansible_default_ipv4.address }};
+    listen 80;
+    server_name strengthsnametent.com www.strengthsnametent.com;
 
     location / {
         include proxy_params;
         proxy_pass http://127.0.0.1:{{ gunicorn_port }};
     }
-    
+
     location /ycj {
         root /var/app/ycj;
     }

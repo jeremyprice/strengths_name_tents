@@ -15,7 +15,6 @@
       runtime_user: www-data
       gunicorn_sock: /run/strengths/socket
       gunicorn_port: "9000"
-      listen_port: "80"
 
     tasks:
       - name: setup {{ runtime_user }} user
@@ -58,7 +57,7 @@
           - { src: "tmpfiles.d.conf.j2", dest: "/usr/lib/tmpfiles.d/strengths.conf" }
 
       - name: install the nginx config file
-        template: src=nginx.j2 dest=/etc/nginx/sites-available/strengths
+        template: src=nginx-secure.j2 dest=/etc/nginx/sites-available/strengths
         notify: restart nginx
 
       - name: enable the strengths site config in nginx
@@ -77,7 +76,10 @@
         ufw: rule=limit state=enabled port=ssh
 
       - name: poke a hole in the firewall for the nginx server
-        ufw: proto=tcp rule=allow state=enabled to_port={{ listen_port }}
+        ufw: proto=tcp rule=allow state=enabled to_port={{ item }}
+        with_items:
+          - "80"
+          - "443"
 
       - name: ensure nginx and app are started and boot enabled
         service: name={{ item }} state=started enabled=yes
