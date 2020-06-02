@@ -56,7 +56,7 @@ def print_name(name, canvas):
     canvas.drawString(LEFT_X, y, name)
 
 
-def print_lines(canvas):
+def print_line(canvas):
     # draw the line between the name and the strengths
     canvas.setStrokeColorRGB(*RACKSPACE_RED_RGB)
     canvas.setFillColorRGB(*RACKSPACE_RED_RGB)
@@ -114,29 +114,29 @@ def print_talents(talents, canvas, right=False):
             y = text_start_y - (2 * large_line_spacing)
 
 
-def create_name_tent(fname, name, talents, image=None):
-    load_fonts()
+def print_quadrant(canvas, image, rotate, translate_w, translate_h, name, talents):
+    canvas.saveState()
+    canvas.translate(translate_w, translate_h)
+    canvas.rotate(rotate)
+    if image:
+        print_image(image, canvas)
+        print_talents(talents, canvas, right=True)
+    else:
+        print_talents(talents, canvas, right=False)
+    print_name(name, canvas)
+    print_line(canvas)
+    canvas.restoreState()
+
+def create_name_tent(fname, top_name, top_talents, bottom_name, bottom_talents, image=None):
     canvas = create_pdf_canvas(fname)
     # print the fold and cut lines
     print_fold_cut_lines(canvas)
-    # setup the rotate and translations
-    sides = ((90, PAGE_WIDTH/2, PAGE_HEIGHT/2),
-             (90, PAGE_WIDTH/2, 0),
-             (270, PAGE_WIDTH/2, PAGE_HEIGHT/2),
-             (270, PAGE_WIDTH/2, PAGE_HEIGHT))
-    for rotate, tw, th in sides:
-        # rotate and print the right side
-        canvas.saveState()
-        canvas.translate(tw, th)
-        canvas.rotate(rotate)
-        if image:
-            print_image(image, canvas)
-            print_talents(talents, canvas, right=True)
-        else:
-            print_talents(talents, canvas, right=False)
-        print_name(name, canvas)
-        print_lines(canvas)
-        canvas.restoreState()
+    # setup the rotate, translations, and info
+    print_quadrant(canvas, image, 90, PAGE_WIDTH/2, PAGE_HEIGHT/2, top_name, top_talents)
+    print_quadrant(canvas, image, 90, PAGE_WIDTH/2, 0, bottom_name, bottom_talents)
+    print_quadrant(canvas, image, 270, PAGE_WIDTH/2, PAGE_HEIGHT/2, bottom_name, bottom_talents)
+    print_quadrant(canvas, image, 270, PAGE_WIDTH/2, PAGE_HEIGHT, top_name, top_talents)
+
     canvas.showPage()
     canvas.save()
 
@@ -146,10 +146,11 @@ def main():
     # all can have title or no title (can add top XX talents for title)
     # option to add Rackspace logo to lower left
     # data can either come through one at a time (manual) or load from Gallup Excel export
+    load_fonts()
     image = sys.argv[1]
     name = sys.argv[2]
     talents = sys.argv[3:8]
-    create_name_tent('{}_strengths.pdf'.format(name), name, talents, image=image)
+    create_name_tent('{}_strengths.pdf'.format(name), name, talents, name, talents, image=image)
 
 
 if __name__ == '__main__':
