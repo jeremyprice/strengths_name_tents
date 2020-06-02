@@ -119,29 +119,24 @@ def create_name_tent(fname, name, talents, image=None):
     canvas = create_pdf_canvas(fname)
     # print the fold and cut lines
     print_fold_cut_lines(canvas)
-    # rotate and print the right side
-    canvas.saveState()
-    canvas.translate(PAGE_WIDTH/2, PAGE_HEIGHT/2)
-    canvas.rotate(90)
-    if image:
-        print_image(image, canvas)
-        print_talents(talents, canvas, right=True)
-    else:
-        print_talents(talents, canvas, right=False)
-    print_name(name, canvas)
-    print_lines(canvas)
-    canvas.restoreState()
-    # canvas.saveState()
-    # canvas.translate(0, PAGE_HEIGHT)
-    # canvas.rotate(270)
-    # if image:
-    #     print_image(image, canvas)
-    #     print_talents(talents, canvas, right=True)
-    # else:
-    #     print_talents(talents, canvas, right=False)
-    # print_name(name, canvas)
-    # print_lines(canvas)
-    # canvas.restoreState()
+    # setup the rotate and translations
+    sides = ((90, PAGE_WIDTH/2, PAGE_HEIGHT/2),
+             (90, PAGE_WIDTH/2, 0),
+             (270, PAGE_WIDTH/2, PAGE_HEIGHT/2),
+             (270, PAGE_WIDTH/2, PAGE_HEIGHT))
+    for rotate, tw, th in sides:
+        # rotate and print the right side
+        canvas.saveState()
+        canvas.translate(tw, th)
+        canvas.rotate(rotate)
+        if image:
+            print_image(image, canvas)
+            print_talents(talents, canvas, right=True)
+        else:
+            print_talents(talents, canvas, right=False)
+        print_name(name, canvas)
+        print_lines(canvas)
+        canvas.restoreState()
     canvas.showPage()
     canvas.save()
 
