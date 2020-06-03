@@ -20,6 +20,7 @@ def main(xlfname, output_dir, imgfname=None, mini=False):
         renderer = render_pdf
     # start with "vRO US and Canada June 2020 Master Roster.xlsx" format
     df = pd.read_excel(xlfname, sheet_name="Roster")
+    name_tent = renderer.MultiPageNameTent('{:s}/output.pdf'.format(output_dir))
     spares = []
     if len(df) % 2 == 1:
         # odd
@@ -28,7 +29,6 @@ def main(xlfname, output_dir, imgfname=None, mini=False):
     else:
         end = len(df)
     for row_idx in range(0, end, 2):
-        fname = '{:s}/{:02d}.pdf'.format(output_dir, row_idx)
         top_name, top_talents = get_name_talents(df.iloc[row_idx])
         bottom_name, bottom_talents = get_name_talents(df.iloc[row_idx + 1])
         if np.nan in top_talents:
@@ -42,7 +42,7 @@ def main(xlfname, output_dir, imgfname=None, mini=False):
             print('Skipping {}: no Strengths'.format(bottom_name))
             spares.append((top_name, top_talents))
             continue
-        renderer.create_name_tent(fname, top_name, top_talents, bottom_name, bottom_talents, imgfname)
+        name_tent.create_page(top_name, top_talents, bottom_name, bottom_talents, imgfname)
     #TODO: go through the spares and print them
     if len(spares) % 2 == 1:
         # odd
@@ -52,15 +52,16 @@ def main(xlfname, output_dir, imgfname=None, mini=False):
         end = len(spares)
         odd = False
     for row_idx in range(0, end, 2):
-        fname = '{:s}/spares-{:02d}.pdf'.format(output_dir, row_idx)
         top_name, top_talents = spares[row_idx]
         bottom_name, bottom_talents = spares[row_idx+1]
-        renderer.create_name_tent(fname, top_name, top_talents, bottom_name, bottom_talents, imgfname)
+        name_tent.create_page(top_name, top_talents, bottom_name, bottom_talents, imgfname)
     if odd:
-        fname = '{:s}/spares-{:02d}.pdf'.format(output_dir, len(spares)-1)
         top_name, top_talents = spares[-1]
-        renderer.create_name_tent(fname, top_name, top_talents, None, None, imgfname)
+        renderer.create_page(top_name, top_talents, None, None, imgfname)
+    name_tent.done()
+
 if __name__ == '__main__':
     if len(sys.argv) < 4:
         print('Usage: {} <xlfname> <output_dir> <imgfname>'.format(sys.argv[0]))
+        raise SystemExit()
     main(sys.argv[1], sys.argv[2], sys.argv[3], mini=True)

@@ -127,20 +127,28 @@ def print_quadrant(canvas, image, rotate, translate_w, translate_h, name, talent
     print_line(canvas)
     canvas.restoreState()
 
-def create_name_tent(fname, top_name=None, top_talents=None, bottom_name=None, bottom_talents=None, image=None):
-    canvas = create_pdf_canvas(fname)
-    # print the fold and cut lines
-    print_fold_cut_lines(canvas)
-    # setup the rotate, translations, and info
-    if not top_name is None and not top_talents is None:
-        print_quadrant(canvas, image, 90, PAGE_WIDTH/2, PAGE_HEIGHT/2, top_name, top_talents)
-        print_quadrant(canvas, image, 270, PAGE_WIDTH/2, PAGE_HEIGHT/2, bottom_name, bottom_talents)
-    if not bottom_name is None and not bottom_talents is None:
-        print_quadrant(canvas, image, 90, PAGE_WIDTH/2, 0, bottom_name, bottom_talents)
-        print_quadrant(canvas, image, 270, PAGE_WIDTH/2, PAGE_HEIGHT, top_name, top_talents)
+class MultiPageNameTent(object):
+    def __init__(self, fname):
+        self.canvas = create_pdf_canvas(fname)
 
-    canvas.showPage()
-    canvas.save()
+    def create_page(self, top_name=None, top_talents=None, bottom_name=None, bottom_talents=None, image=None):
+        print_fold_cut_lines(self.canvas)
+        # setup the rotate, translations, and info
+        if not top_name is None and not top_talents is None:
+            print_quadrant(self.canvas, image, 90, PAGE_WIDTH/2, PAGE_HEIGHT/2, top_name, top_talents)
+            print_quadrant(self.canvas, image, 270, PAGE_WIDTH/2, PAGE_HEIGHT/2, bottom_name, bottom_talents)
+        if not bottom_name is None and not bottom_talents is None:
+            print_quadrant(self.canvas, image, 90, PAGE_WIDTH/2, 0, bottom_name, bottom_talents)
+            print_quadrant(self.canvas, image, 270, PAGE_WIDTH/2, PAGE_HEIGHT, top_name, top_talents)
+        self.canvas.showPage()
+
+    def done(self):
+        self.canvas.save()
+
+def create_name_tent(fname, top_name=None, top_talents=None, bottom_name=None, bottom_talents=None, image=None):
+    name_tent = MultiPageNameTent(fname)
+    name_tent.create_page(top_name, top_talents, bottom_name, bottom_talents, image)
+    name_tent.done()
 
 
 def main():
