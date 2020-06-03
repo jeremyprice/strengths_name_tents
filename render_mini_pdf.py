@@ -11,6 +11,7 @@ from reportlab.lib.units import inch
 from num2words import num2words
 import reportlab.platypus
 from PIL import Image
+import math
 
 PAGE_WIDTH, PAGE_HEIGHT = pagesizes.LETTER
 text_start_y = -0.5*inch
@@ -49,11 +50,24 @@ def create_pdf_canvas(fname):
 
 
 def print_name(name, canvas):
-    canvas.setFont('FiraSans', 34)
-    canvas.setStrokeColorRGB(*RACKSPACE_RED_RGB)
-    canvas.setFillColorRGB(*RACKSPACE_RED_RGB)
-    y = text_start_y - name_only_spacing
-    canvas.drawString(LEFT_X, y, name)
+    if len(name) > 20:
+        # name is too long for one line
+        canvas.setFont('FiraSans', 30)
+        canvas.setStrokeColorRGB(*RACKSPACE_RED_RGB)
+        canvas.setFillColorRGB(*RACKSPACE_RED_RGB)
+        parts = name.split()
+        part_split = math.ceil(len(parts) / 2)
+        first_name = ' '.join(parts[:part_split])
+        last_name = ' '.join(parts[part_split:])
+        y = text_start_y
+        canvas.drawString(LEFT_X, y, first_name)
+        canvas.drawString(LEFT_X, y-small_line_spacing, last_name)
+    else:
+        canvas.setFont('FiraSans', 34)
+        canvas.setStrokeColorRGB(*RACKSPACE_RED_RGB)
+        canvas.setFillColorRGB(*RACKSPACE_RED_RGB)
+        y = text_start_y - name_only_spacing
+        canvas.drawString(LEFT_X, y, name)
 
 
 def print_line(canvas):
@@ -132,7 +146,7 @@ class MultiPageNameTent(object):
         self.canvas = create_pdf_canvas(fname)
 
     def create_page(self, top_name=None, top_talents=None, bottom_name=None, bottom_talents=None, image=None):
-        print_fold_cut_lines(self.canvas)
+        # print_fold_cut_lines(self.canvas)
         # setup the rotate, translations, and info
         if not top_name is None and not top_talents is None:
             print_quadrant(self.canvas, image, 90, PAGE_WIDTH/2, PAGE_HEIGHT/2, top_name, top_talents)
